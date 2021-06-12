@@ -85,10 +85,6 @@ xTUNNEL depends on the following core packages
 | ------------------ | --------------- |
 | supergiant-hq/xnet | [View][pkgxnet] |
 
-## TODO
-
-- Multiple tunnels
-
 ## License
 
 Apache License 2.0
