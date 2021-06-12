@@ -89,7 +89,7 @@ xTUNNEL depends on the following core packages
 
 ## License
 
-The MIT License
+Apache License 2.0
 
 [//]: # "Links"
 [pkgxnet]: https://github.com/supergiant-hq/xnet
