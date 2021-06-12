@@ -1,0 +1,14 @@
+clients:
+  - id: client-1
+    token: "token-c1"
+  - id: client-2
+    token: "token-c2"
+  - id: client-3
+    token: "token-c3"
+  - id: client-4
+    token: "token-c4"
+  - id: client-5
+    token: "token-c5"
+  - id: relay-1
+    token: "token-r1"
+    relay: true

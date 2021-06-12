@@ -1,0 +1,15 @@
+syntax="proto3";
+option go_package="/model";
+
+package model;
+
+message TunnelOpen {
+    string type = 1;
+    string fromAddress = 2;
+    string toAddress = 3;
+}
+
+message TunnelOpenResponse {
+    bool status = 1;
+    string message = 2;
+}
