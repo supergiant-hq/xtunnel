@@ -29,6 +29,8 @@ Download the binary for your respective `OS` and `ARCH` from the [Releases][rele
 | configFile   | Config File           | File Path               | ./config.yaml |
 | debug        | Debug Mode            | boolean                 | false         |
 
+> Note: `sudo` is required in `client` mode to `PING` relay servers and choose the nearest one
+
 ## Example
 
 1.  Run the `Broker` server
@@ -46,25 +48,25 @@ Download the binary for your respective `OS` and `ARCH` from the [Releases][rele
 3.  Connect `client-1`
 
     ```sh
-    xtunnel-os-arch --mode=client --token=token-c1 --broker=localhost:10000
+    sudo xtunnel-os-arch --mode=client --token=token-c1 --broker=localhost:10000
     ```
 
 4.  `Tunnel` from `client-2` to `client-1` using `P2P` mode and tunnel `TCP` traffic
 
     ```sh
-    xtunnel-os-arch --mode=client --token=token-c2 --broker=localhost:10000 --peerid=client-1 --peermode=p2p --tuntype=tcp --tunfrom=:8000 --tunto=192.168.1.100:22
+    sudo xtunnel-os-arch --mode=client --token=token-c2 --broker=localhost:10000 --peerid=client-1 --peermode=p2p --tuntype=tcp --tunfrom=:8000 --tunto=192.168.1.100:22
     ```
 
 5.  `Tunnel` from `client-3` to `client-1` using `Relay` mode and tunnel `TCP` traffic
 
     ```sh
-    xtunnel-os-arch --mode=client --token=token-c3 --broker=localhost:10000 --peerid=client-1 --peermode=relay --tuntype=tcp --tunfrom=:8100 --tunto=192.168.1.100:22
+    sudo xtunnel-os-arch --mode=client --token=token-c3 --broker=localhost:10000 --peerid=client-1 --peermode=relay --tuntype=tcp --tunfrom=:8100 --tunto=192.168.1.100:22
     ```
 
 6.  `Reverse Tunnel` from `client-1` to `client-4` using `Relay` mode and tunnel `TCP` traffic
 
     ```sh
-    xtunnel-os-arch --mode=client --token=token-c4 --broker=localhost:10000 --peerid=client-3 --peermode=p2p --tuntype=tcp --tunrev=true --tunfrom=:9100 --tunto=192.168.1.100:22
+    sudo xtunnel-os-arch --mode=client --token=token-c4 --broker=localhost:10000 --peerid=client-3 --peermode=p2p --tuntype=tcp --tunrev=true --tunfrom=:9100 --tunto=192.168.1.100:22
     ```
 
 ## Build
