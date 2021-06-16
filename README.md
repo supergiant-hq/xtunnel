@@ -1,5 +1,7 @@
 # xTUNNEL
 
+[![Release Go project](https://github.com/supergiant-hq/xtunnel/actions/workflows/goreleaser.yaml/badge.svg)](https://github.com/supergiant-hq/xtunnel/actions/workflows/goreleaser.yaml)
+
 xTUNNEL is a tool to tunnel TCP/UDP traffic between systems.
 
 ## Features
