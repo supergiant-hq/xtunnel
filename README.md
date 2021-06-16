@@ -8,6 +8,14 @@ xTUNNEL is a tool to tunnel TCP/UDP traffic between systems.
 - Reverse tunnels
 - Tunnel between systems even if they're behind a NAT
 
+## Supports
+
+| OS      | Arch         |
+| ------- | ------------ |
+| linux   | amd64, arm64 |
+| darwin  | amd64, arm64 |
+| windows | amd64        |
+
 ## Usage
 
 Download the binary for your respective `OS` and `ARCH` from the [Releases][releases] tab
