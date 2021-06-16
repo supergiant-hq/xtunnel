@@ -19,12 +19,12 @@ var (
 	brokerAddr       = flag.String("broker", ":10000", "Broker Address")
 	relayAddr        = flag.String("relay", "", "Relay Address")
 	token            = flag.String("token", "", "Auth Token")
-	peerId           = flag.String("peerid", "", "client-1")
-	peerMode         = flag.String("peermode", string(p2p.ConnectionModeP2P), "p2p or relay")
-	tunType          = flag.String("tuntype", "tcp", "tcp or udp")
-	tunRev           = flag.Bool("tunrev", false, "Reverse Tunnel")
-	tunFrom          = flag.String("tunfrom", "", "Tunnel from ip:port")
-	tunTo            = flag.String("tunto", "", "Tunnel to ip:port")
+	tunPeer          = flag.String("tunPeer", "", "Peer to tunnel to")
+	tunPeerMode      = flag.String("tunPeerMode", string(p2p.ConnectionModeP2P), "Peer connection mode: p2p or relay")
+	tunType          = flag.String("tunType", "tcp", "Tunnel Type: tcp or udp")
+	tunRev           = flag.Bool("tunRev", false, "Reverse Tunnel")
+	tunFrom          = flag.String("tunFrom", "", "Tunnel from ip:port")
+	tunTo            = flag.String("tunTo", "", "Tunnel to ip:port")
 	configFile       = flag.String("config", "./config.yaml", "Config File")
 	debug            = flag.Bool("d", false, "Debug")
 )
@@ -38,6 +38,11 @@ func main() {
 	}
 	log := util.NewLogger(logLevel)
 
+	fileCfg, err := config.ParseFile(*configFile)
+	if err != nil {
+		log.Warnf("Error parsing config file: %v", err.Error())
+	}
+
 	cliCfg := config.CLIConfig{
 		Mode:             *mode,
 		BrokerListenAddr: *brokerListenAddr,
@@ -45,19 +50,18 @@ func main() {
 		BrokerAddr:       *brokerAddr,
 		RelayAddr:        *relayAddr,
 		Token:            *token,
-		PeerID:           *peerId,
-		PeerMode:         *peerMode,
+		TunPeer:          *tunPeer,
+		TunPeerMode:      *tunPeerMode,
 		TunType:          *tunType,
 		TunRev:           *tunRev,
 		TunFrom:          *tunFrom,
 		TunTo:            *tunTo,
-		ConfigFile:       *configFile,
 		Debug:            *debug,
 	}
 
 	switch *mode {
 	case "broker":
-		s, err := server.LaunchBroker(log, cliCfg)
+		s, err := server.LaunchBroker(log, cliCfg, fileCfg)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -71,7 +75,7 @@ func main() {
 		<-s.Exit
 
 	case "client":
-		c, err := client.LaunchClient(log, cliCfg)
+		c, err := client.LaunchClient(log, cliCfg, fileCfg)
 		if err != nil {
 			log.Fatalln(err)
 		}

@@ -1,0 +1,17 @@
+tunnels:
+  - peer: client-1
+    mode: p2p
+    type: tcp
+    from: ":10000"
+    to: "192.168.1.100:22"
+  - peer: client-2
+    mode: p2p
+    type: tcp
+    from: ":10100"
+    to: "192.168.1.100:22"
+  - peer: client-3
+    mode: relay
+    type: tcp
+    reverse: true
+    from: ":10200"
+    to: "192.168.1.100:22"

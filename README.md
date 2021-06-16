@@ -12,22 +12,22 @@ xTUNNEL is a tool to tunnel TCP/UDP traffic between systems.
 
 Download the binary for your respective `OS` and `ARCH` from the [Releases][releases] tab
 
-| Argument     | Description           | Type                    | Default       |
-| ------------ | --------------------- | ----------------------- | ------------- |
-| mode         | Operation Mode        | broker, relay or client | broker        |
-| brokerListen | Broker Listen Address | IP:PORT                 | :10000        |
-| relayListen  | Relay Listen Address  | IP:PORT                 | :15000        |
-| brokerAddr   | Broker Address        | IP:PORT                 | :10000        |
-| relayAddr    | Relay Address         | IP:PORT                 | ""            |
-| token        | Authentication Token  | String                  | ""            |
-| peerId       | Peer to connect to    | String                  | ""            |
-| peerMode     | Peer connect mode     | p2p or relay            | p2p           |
-| tunType      | Tunnel Type           | tcp or udp              | tcp           |
-| tunRev       | Reverse Tunnel        | boolean                 | false         |
-| tunFrom      | Tunnel requests from  | IP:PORT                 | ""            |
-| tunTo        | Tunnel requests to    | IP:PORT                 | ""            |
-| configFile   | Config File           | File Path               | ./config.yaml |
-| debug        | Debug Mode            | boolean                 | false         |
+| Argument     | Description               | Type                    | Default       |
+| ------------ | ------------------------- | ----------------------- | ------------- |
+| mode         | Operation Mode            | broker, relay or client | broker        |
+| brokerListen | Broker Listen Address     | IP:PORT                 | :10000        |
+| relayListen  | Relay Listen Address      | IP:PORT                 | :15000        |
+| brokerAddr   | Broker Address            | IP:PORT                 | :10000        |
+| relayAddr    | Relay Address             | IP:PORT                 | ""            |
+| token        | Authentication Token      | String                  | ""            |
+| tunPeer      | Tunnel Peer to connect to | String                  | ""            |
+| tunPeerMode  | Tunnel Peer connect mode  | p2p or relay            | p2p           |
+| tunType      | Tunnel Type               | tcp or udp              | tcp           |
+| tunRev       | Reverse Tunnel            | boolean                 | false         |
+| tunFrom      | Tunnel requests from      | IP:PORT                 | ""            |
+| tunTo        | Tunnel requests to        | IP:PORT                 | ""            |
+| config       | Config File               | File Path               | ./config.yaml |
+| debug        | Debug Mode                | boolean                 | false         |
 
 > Note: `sudo` is required in `client` mode to `PING` relay servers and choose the nearest one
 
@@ -36,7 +36,7 @@ Download the binary for your respective `OS` and `ARCH` from the [Releases][rele
 1.  Run the `Broker` server
 
     ```sh
-    xtunnel-os-arch --mode=broker --config="./example/config.yaml"
+    xtunnel-os-arch --mode=broker --config="./example/server.yaml"
     ```
 
 2.  Run the `Relay` server
@@ -54,19 +54,25 @@ Download the binary for your respective `OS` and `ARCH` from the [Releases][rele
 4.  `Tunnel` from `client-2` to `client-1` using `P2P` mode and tunnel `TCP` traffic
 
     ```sh
-    sudo xtunnel-os-arch --mode=client --token=token-c2 --broker=localhost:10000 --peerid=client-1 --peermode=p2p --tuntype=tcp --tunfrom=:8000 --tunto=192.168.1.100:22
+    sudo xtunnel-os-arch --mode=client --token=token-c2 --broker=localhost:10000 --tunPeer=client-1 --tunPeerMode=p2p --tunType=tcp --tunFrom=:8000 --tunTo=192.168.1.100:22
     ```
 
 5.  `Tunnel` from `client-3` to `client-1` using `Relay` mode and tunnel `TCP` traffic
 
     ```sh
-    sudo xtunnel-os-arch --mode=client --token=token-c3 --broker=localhost:10000 --peerid=client-1 --peermode=relay --tuntype=tcp --tunfrom=:8100 --tunto=192.168.1.100:22
+    sudo xtunnel-os-arch --mode=client --token=token-c3 --broker=localhost:10000 --tunPeer=client-1 --tunPeerMode=relay --tunType=tcp --tunFrom=:8100 --tunTo=192.168.1.100:22
     ```
 
-6.  `Reverse Tunnel` from `client-1` to `client-4` using `Relay` mode and tunnel `TCP` traffic
+6.  `Reverse Tunnel` from `client-1` to `client-4` using `P2P` mode and tunnel `TCP` traffic
 
     ```sh
-    sudo xtunnel-os-arch --mode=client --token=token-c4 --broker=localhost:10000 --peerid=client-3 --peermode=p2p --tuntype=tcp --tunrev=true --tunfrom=:9100 --tunto=192.168.1.100:22
+    sudo xtunnel-os-arch --mode=client --token=token-c4 --broker=localhost:10000 --tunPeer=client-3 --tunPeerMode=p2p --tunType=tcp --tunRev=true --tunFrom=:9000 --tunTo=192.168.1.100:22
+    ```
+
+7.  `Multiple Tunnels` from `client-5`
+
+    ```sh
+    sudo xtunnel-os-arch --mode=client --token=token-c5 --broker=localhost:10000 --config="./example/client-5.yaml"
     ```
 
 ## Build

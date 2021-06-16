@@ -10,51 +10,29 @@ import (
 	"github.com/supergiant-hq/xnet/udp"
 )
 
-type UDPConn struct {
-	udpConn  *net.UDPConn
-	clientIp *net.UDPAddr
-	stream   *udp.Stream
+type UDPTunneler struct {
+	conns    map[string]*UDPConn
+	forwards *sync.Map
+	mutex    sync.RWMutex
 	log      *logrus.Logger
 }
 
-func (c *UDPConn) relayIncomingPackets() {
-	defer func() {
-		recover()
-		c.stream.Close()
-	}()
-
-	packet := make([]byte, 2048)
-	for {
-		if c.stream.Closed {
-			return
-		}
-
-		plen, err := c.stream.Stream().Read(packet)
-		if err != nil {
-			c.log.Errorln(err)
-			break
-		}
-		_, err = c.udpConn.WriteToUDP(packet[:plen], c.clientIp)
-		if err != nil {
-			c.log.Errorf("[UDP] Read from remote error: %+v", err)
-		}
+func NewUDPTunneler(log *logrus.Logger) *UDPTunneler {
+	return &UDPTunneler{
+		conns:    make(map[string]*UDPConn),
+		forwards: new(sync.Map),
+		log:      log,
 	}
 }
 
-type UDPTunnel struct {
-	conns map[string]*UDPConn
-	mutex sync.RWMutex
-	log   *logrus.Logger
-}
+func (tun *UDPTunneler) ForwardFrom(c *p2pc.Connection, fromAddr, toAddr string) (err error) {
+	tun.mutex.Lock()
+	defer tun.mutex.Unlock()
 
-func NewUDPTunnel(log *logrus.Logger) *UDPTunnel {
-	return &UDPTunnel{
-		conns: make(map[string]*UDPConn),
-		log:   log,
+	if forward, ok := tun.forwards.LoadAndDelete(fromAddr); ok {
+		forward.(*Forward).Close("New forward request")
 	}
-}
 
-func (tun *UDPTunnel) ForwardFrom(c *p2pc.Connection, fromAddr, toAddr string) (listener *net.UDPConn, err error) {
 	listenAddr, err := net.ResolveUDPAddr("udp", fromAddr)
 	if err != nil {
 		return
@@ -65,16 +43,24 @@ func (tun *UDPTunnel) ForwardFrom(c *p2pc.Connection, fromAddr, toAddr string) (
 		return
 	}
 
-	listener, err = net.ListenUDP("udp", listenAddr)
+	listener, err := net.ListenUDP("udp", listenAddr)
 	if err != nil {
 		return
 	}
+
+	forward := &Forward{
+		FromAddr:    fromAddr,
+		ToAddr:      toAddr,
+		Conn:        c,
+		Forwards:    tun.forwards,
+		UDPListener: listener,
+	}
+	tun.forwards.Store(fromAddr, forward)
 	tun.log.Infof("-> [UDP] Forwarding packets from (%s)", listenAddr.String())
 
 	go func() {
 		defer func() {
-			recover()
-			listener.Close()
+			forward.Close("Connection closed")
 		}()
 
 		for {
@@ -130,7 +116,7 @@ func (tun *UDPTunnel) ForwardFrom(c *p2pc.Connection, fromAddr, toAddr string) (
 	return
 }
 
-func (tun *UDPTunnel) ForwardTo(stream *udp.Stream, toAddr string) (err error) {
+func (tun *UDPTunneler) ForwardTo(stream *udp.Stream, toAddr string) (err error) {
 	remoteAddr, err := net.ResolveUDPAddr("udp", toAddr)
 	if err != nil {
 		return
@@ -162,4 +148,15 @@ func (tun *UDPTunnel) ForwardTo(stream *udp.Stream, toAddr string) (err error) {
 	<-stream.Exit
 
 	return
+}
+
+func (tun *UDPTunneler) CloseConns() {
+	tun.mutex.Lock()
+	defer tun.mutex.Unlock()
+
+	tun.forwards.Range(func(key, value interface{}) bool {
+		value.(*Forward).Close("Closing all connections")
+		tun.forwards.Delete(key)
+		return true
+	})
 }
