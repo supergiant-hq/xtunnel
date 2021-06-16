@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/lucas-clemente/quic-go v0.21.1 // indirect
-	github.com/marten-seemann/qtls-go1-17 v0.1.0-beta.1.2 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/supergiant-hq/xnet v0.1.4
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
