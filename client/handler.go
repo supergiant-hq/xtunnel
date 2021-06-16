@@ -45,23 +45,9 @@ func (c *client) tunnelOpenHandler(ms *p2pc.MessageStream, msg *network.Message)
 
 	switch msgData.Type {
 	case tunnel.TunTypeTCP:
-		if listener, ferr := c.tcpTunnel.ForwardFrom(ms.Conn, msgData.FromAddress, msgData.ToAddress); ferr != nil {
-			err = ferr
-		} else {
-			go func() {
-				<-ms.Conn.Exit
-				listener.Close()
-			}()
-		}
+		err = c.tcpTunneler.ForwardFrom(ms.Conn, msgData.FromAddress, msgData.ToAddress)
 	case tunnel.TunTypeUDP:
-		if listener, ferr := c.udpTunnel.ForwardFrom(ms.Conn, msgData.FromAddress, msgData.ToAddress); ferr != nil {
-			err = ferr
-		} else {
-			go func() {
-				<-ms.Conn.Exit
-				listener.Close()
-			}()
-		}
+		err = c.udpTunneler.ForwardFrom(ms.Conn, msgData.FromAddress, msgData.ToAddress)
 	default:
 		err = fmt.Errorf("invalid tunnel mode")
 	}

@@ -3,36 +3,58 @@ package tunnel
 import (
 	"io"
 	"net"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 	p2pc "github.com/supergiant-hq/xnet/p2p/client"
 	"github.com/supergiant-hq/xnet/udp"
 )
 
-type TCPTunnel struct {
-	log *logrus.Logger
+type TCPTunneler struct {
+	forwards *sync.Map
+	mutex    sync.Mutex
+	log      *logrus.Logger
 }
 
-func NewTCPTunnel(log *logrus.Logger) *TCPTunnel {
-	return &TCPTunnel{
-		log: log,
+func NewTCPTunneler(log *logrus.Logger) *TCPTunneler {
+	return &TCPTunneler{
+		log:      log,
+		forwards: new(sync.Map),
 	}
 }
 
-func (tun *TCPTunnel) ForwardFrom(c *p2pc.Connection, fromAddress, toAddress string) (listener *net.TCPListener, err error) {
-	listenAddr, err := net.ResolveTCPAddr("tcp", fromAddress)
+func (tun *TCPTunneler) ForwardFrom(c *p2pc.Connection, fromAddr, toAddr string) (err error) {
+	tun.mutex.Lock()
+	defer tun.mutex.Unlock()
+
+	if forward, ok := tun.forwards.LoadAndDelete(fromAddr); ok {
+		forward.(*Forward).Close("New forward request")
+	}
+
+	listenAddr, err := net.ResolveTCPAddr("tcp", fromAddr)
 	if err != nil {
 		return
 	}
 
-	listener, err = net.ListenTCP("tcp", listenAddr)
+	listener, err := net.ListenTCP("tcp", listenAddr)
 	if err != nil {
 		return
 	}
-	tun.log.Infof("-> [TCP] Forwarding connections from (%s)", fromAddress)
+
+	forward := &Forward{
+		FromAddr:    fromAddr,
+		ToAddr:      toAddr,
+		Conn:        c,
+		Forwards:    tun.forwards,
+		TCPListener: listener,
+	}
+	tun.forwards.Store(fromAddr, forward)
+	tun.log.Infof("-> [TCP] Forwarding connections from (%s)", fromAddr)
 
 	go func() {
-		defer listener.Close()
+		defer func() {
+			forward.Close("Connection closed")
+		}()
 
 		for {
 			if c.Closed {
@@ -41,14 +63,14 @@ func (tun *TCPTunnel) ForwardFrom(c *p2pc.Connection, fromAddress, toAddress str
 
 			conn, err := listener.Accept()
 			if err != nil {
-				tun.log.Errorln("Error accepting connection on: ", fromAddress, err.Error())
+				tun.log.Errorln("[TCP] Error accepting connection on: ", fromAddr, err.Error())
 				continue
 			}
-			tun.log.Infof("-> [TCP] Forwarding connection from (%s) to (%s)", fromAddress, toAddress)
+			tun.log.Infof("-> [TCP] Forwarding connection from (%s) to (%s)", fromAddr, toAddr)
 
 			stream, err := c.OpenStream(map[string]string{
 				"type":    TunTypeTCP,
-				"address": toAddress,
+				"address": toAddr,
 			})
 			if err != nil {
 				tun.log.Errorln(err.Error())
@@ -77,7 +99,7 @@ func (tun *TCPTunnel) ForwardFrom(c *p2pc.Connection, fromAddress, toAddress str
 	return
 }
 
-func (tun *TCPTunnel) ForwardTo(stream *udp.Stream, address string) (err error) {
+func (tun *TCPTunneler) ForwardTo(stream *udp.Stream, address string) (err error) {
 	raddr, err := net.ResolveTCPAddr("tcp", address)
 	if err != nil {
 		return
@@ -107,4 +129,15 @@ func (tun *TCPTunnel) ForwardTo(stream *udp.Stream, address string) (err error) 
 	}()
 
 	return
+}
+
+func (tun *TCPTunneler) CloseConns() {
+	tun.mutex.Lock()
+	defer tun.mutex.Unlock()
+
+	tun.forwards.Range(func(key, value interface{}) bool {
+		value.(*Forward).Close("Closing all connections")
+		tun.forwards.Delete(key)
+		return true
+	})
 }

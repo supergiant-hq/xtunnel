@@ -11,7 +11,7 @@ import (
 	p2pc "github.com/supergiant-hq/xnet/p2p/client"
 )
 
-func Reverse(log *logrus.Logger, conn *p2pc.Connection, cfg config.CLIConfig) (err error) {
+func Reverse(log *logrus.Logger, conn *p2pc.Connection, cfg config.Tunnel) (err error) {
 	log.Infoln("Requesting reverse tunnel...")
 
 	ms, err := conn.OpenMessageStream()
@@ -21,9 +21,9 @@ func Reverse(log *logrus.Logger, conn *p2pc.Connection, cfg config.CLIConfig) (e
 	defer ms.Close()
 
 	msgData := &model.TunnelOpen{
-		Type:        cfg.TunType,
-		FromAddress: cfg.TunFrom,
-		ToAddress:   cfg.TunTo,
+		Type:        cfg.Type,
+		FromAddress: cfg.From,
+		ToAddress:   cfg.To,
 	}
 	msg := network.NewMessageWithAck(model.MessageTypeTunnelOpen, msgData, network.RequestTimeout)
 	rmsg, err := ms.SendAndRead(msg)

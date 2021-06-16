@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net"
 
 	"github.com/sirupsen/logrus"
@@ -13,13 +12,13 @@ import (
 	udps "github.com/supergiant-hq/xnet/udp/server"
 )
 
-func LaunchBroker(log *logrus.Logger, cfg config.CLIConfig) (s *brokers.Server, err error) {
+func LaunchBroker(log *logrus.Logger, cfg config.CLIConfig, fileCfg config.FileConfig) (s *brokers.Server, err error) {
 	log.Infoln("Launching Broker...")
 
-	fileCfg, err := config.ParseFile(cfg.ConfigFile)
-	if err != nil {
-		err = fmt.Errorf("error parsing config file: %v", err.Error())
-		return
+	if len(fileCfg.Clients) == 0 {
+		log.Warnln("No clients found")
+	} else {
+		log.Infof("Found %d clients", len(fileCfg.Clients))
 	}
 
 	listenAddr, err := net.ResolveUDPAddr("udp", cfg.BrokerListenAddr)
@@ -48,7 +47,7 @@ func LaunchBroker(log *logrus.Logger, cfg config.CLIConfig) (s *brokers.Server, 
 	return
 }
 
-func GetClientValidator(cfg *config.FileConfig) udps.ClientValidateHandler {
+func GetClientValidator(cfg config.FileConfig) udps.ClientValidateHandler {
 	return func(u *net.UDPAddr, cvd *model.ClientValidateData) (cd *model.ClientData, err error) {
 		client, err := cfg.GetClientFromToken(cvd.Token)
 		if err != nil {

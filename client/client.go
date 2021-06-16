@@ -2,6 +2,7 @@ package client
 
 import (
 	"net"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/supergiant-hq/tunnel/config"
@@ -15,20 +16,20 @@ import (
 )
 
 type client struct {
-	cfg       config.CLIConfig
-	tcpTunnel *tunnel.TCPTunnel
-	udpTunnel *tunnel.UDPTunnel
-	log       *logrus.Logger
+	cfg         config.CLIConfig
+	tcpTunneler *tunnel.TCPTunneler
+	udpTunneler *tunnel.UDPTunneler
+	log         *logrus.Logger
 }
 
-func LaunchClient(log *logrus.Logger, cfg config.CLIConfig) (c *brokerc.Client, err error) {
+func LaunchClient(log *logrus.Logger, cfg config.CLIConfig, fileCfg config.FileConfig) (c *brokerc.Client, err error) {
 	log.Infoln("Launching Client...")
 
 	client := client{
-		cfg:       cfg,
-		tcpTunnel: tunnel.NewTCPTunnel(log),
-		udpTunnel: tunnel.NewUDPTunnel(log),
-		log:       log,
+		cfg:         cfg,
+		tcpTunneler: tunnel.NewTCPTunneler(log),
+		udpTunneler: tunnel.NewUDPTunneler(log),
+		log:         log,
 	}
 
 	serverAddr, err := net.ResolveUDPAddr("udp", cfg.BrokerAddr)
@@ -62,28 +63,49 @@ func LaunchClient(log *logrus.Logger, cfg config.CLIConfig) (c *brokerc.Client, 
 		return
 	}
 
+	c.SetDisconnectedHandler(func() {
+		client.tcpTunneler.CloseConns()
+		client.udpTunneler.CloseConns()
+	})
 	c.SetMessageStreamHandler(client.onNewMessageStream)
 
 	if err = c.Connect(); err != nil {
 		return
 	}
 
-	if len(cfg.PeerID) > 0 {
-		client.connectToPeer(c, cfg)
+	tunnels := fileCfg.Tunnels
+	if len(tunnels) == 0 && len(cfg.TunPeer) > 0 {
+		tunnels = append(tunnels, config.Tunnel{
+			Peer:    cfg.TunPeer,
+			Mode:    cfg.TunPeerMode,
+			Type:    cfg.TunType,
+			Reverse: cfg.TunRev,
+			From:    cfg.TunFrom,
+			To:      cfg.TunTo,
+		})
+	}
+
+	if len(tunnels) > 0 {
+		client.log.Infoln("Establishing tunnels...")
+		for _, tunCfg := range tunnels {
+			go client.connectToPeer(c, tunCfg)
+		}
 	}
 
 	return
 }
 
-func (c *client) connectToPeer(bc *brokerc.Client, cfg config.CLIConfig) {
+func (c *client) connectToPeer(bc *brokerc.Client, cfg config.Tunnel) {
 	for {
-		conn, err := bc.ConnectPeerById(cfg.PeerID, p2p.ConnectionMode(cfg.PeerMode))
+		<-time.After(time.Second)
+
+		conn, err := bc.ConnectPeerById(cfg.Peer, p2p.ConnectionMode(cfg.Mode))
 		if err != nil {
 			c.log.Errorln(err.Error())
 			continue
 		}
 
-		if cfg.TunRev {
+		if cfg.Reverse {
 			if err = tunnel.Reverse(c.log, conn, cfg); err != nil {
 				c.log.Errorln(err.Error())
 				conn.Close(err.Error())
@@ -92,44 +114,41 @@ func (c *client) connectToPeer(bc *brokerc.Client, cfg config.CLIConfig) {
 				<-conn.Exit
 			}
 		} else {
-			switch cfg.TunType {
+			switch cfg.Type {
 			case tunnel.TunTypeTCP:
-				if listener, err := c.tcpTunnel.ForwardFrom(conn, cfg.TunFrom, cfg.TunTo); err != nil {
+				if err := c.tcpTunneler.ForwardFrom(conn, cfg.From, cfg.To); err != nil {
 					c.log.Errorln(err.Error())
 					conn.Close(err.Error())
 					continue
 				} else {
 					<-conn.Exit
-					listener.Close()
 				}
 			case tunnel.TunTypeUDP:
-				if listener, err := c.udpTunnel.ForwardFrom(conn, cfg.TunFrom, cfg.TunTo); err != nil {
+				if err := c.udpTunneler.ForwardFrom(conn, cfg.From, cfg.To); err != nil {
 					c.log.Errorln(err.Error())
 					conn.Close(err.Error())
 					continue
 				} else {
 					<-conn.Exit
-					listener.Close()
 				}
 			default:
 				c.log.Errorln("Invalid TunType")
 				conn.Close("Invalid TunType")
-				continue
+				return
 			}
 		}
 	}
-
 }
 
 func (c *client) onNewStream(client udp.Client, stream *udp.Stream) {
 	switch stream.Data["type"] {
 	case tunnel.TunTypeTCP:
-		if err := c.tcpTunnel.ForwardTo(stream, stream.Data["address"]); err != nil {
+		if err := c.tcpTunneler.ForwardTo(stream, stream.Data["address"]); err != nil {
 			c.log.Errorln(err.Error())
 			stream.Close()
 		}
 	case tunnel.TunTypeUDP:
-		if err := c.udpTunnel.ForwardTo(stream, stream.Data["address"]); err != nil {
+		if err := c.udpTunneler.ForwardTo(stream, stream.Data["address"]); err != nil {
 			c.log.Errorln(err.Error())
 			stream.Close()
 		}

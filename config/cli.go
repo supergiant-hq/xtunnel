@@ -7,12 +7,11 @@ type CLIConfig struct {
 	BrokerAddr       string
 	RelayAddr        string
 	Token            string
-	PeerID           string
-	PeerMode         string
+	TunPeer          string
+	TunPeerMode      string
 	TunType          string
 	TunRev           bool
 	TunFrom          string
 	TunTo            string
-	ConfigFile       string
 	Debug            bool
 }

@@ -13,18 +13,28 @@ type Client struct {
 	Relay bool
 }
 
-type FileConfig struct {
-	Clients []Client
+type Tunnel struct {
+	Peer    string
+	Mode    string
+	Type    string
+	Reverse bool
+	From    string
+	To      string
 }
 
-func ParseFile(configFile string) (cfg *FileConfig, err error) {
+type FileConfig struct {
+	Clients []Client
+	Tunnels []Tunnel
+}
+
+func ParseFile(configFile string) (cfg FileConfig, err error) {
 	bytes, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return
 	}
 
-	cfg = &FileConfig{}
-	if err = yaml.Unmarshal(bytes, cfg); err != nil {
+	cfg = FileConfig{}
+	if err = yaml.Unmarshal(bytes, &cfg); err != nil {
 		return
 	}
 
