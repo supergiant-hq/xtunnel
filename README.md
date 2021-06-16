@@ -8,17 +8,9 @@ xTUNNEL is a tool to tunnel TCP/UDP traffic between systems.
 - Reverse tunnels
 - Tunnel between systems even if they're behind a NAT
 
-## Supports
-
-| OS      | Arch         |
-| ------- | ------------ |
-| linux   | amd64, arm64 |
-| darwin  | amd64, arm64 |
-| windows | amd64        |
-
 ## Usage
 
-Download the binary for your respective `OS` and `ARCH` from the [Releases][releases] tab
+Download the binary for your respective `OS` and `ARCH` from [Releases][releases]
 
 | Argument     | Description               | Type                    | Default       |
 | ------------ | ------------------------- | ----------------------- | ------------- |
@@ -44,43 +36,43 @@ Download the binary for your respective `OS` and `ARCH` from the [Releases][rele
 1.  Run the `Broker` server
 
     ```sh
-    xtunnel-os-arch --mode=broker --config="./example/server.yaml"
+    xtunnel --mode=broker --config="./example/server.yaml"
     ```
 
 2.  Run the `Relay` server
 
     ```sh
-    xtunnel-os-arch --mode=relay --token=token-r1 --broker=localhost:10000
+    xtunnel --mode=relay --token=token-r1 --broker=localhost:10000
     ```
 
 3.  Connect `client-1`
 
     ```sh
-    sudo xtunnel-os-arch --mode=client --token=token-c1 --broker=localhost:10000
+    sudo xtunnel --mode=client --token=token-c1 --broker=localhost:10000
     ```
 
 4.  `Tunnel` from `client-2` to `client-1` using `P2P` mode and tunnel `TCP` traffic
 
     ```sh
-    sudo xtunnel-os-arch --mode=client --token=token-c2 --broker=localhost:10000 --tunPeer=client-1 --tunPeerMode=p2p --tunType=tcp --tunFrom=:8000 --tunTo=192.168.1.100:22
+    sudo xtunnel --mode=client --token=token-c2 --broker=localhost:10000 --tunPeer=client-1 --tunPeerMode=p2p --tunType=tcp --tunFrom=:8000 --tunTo=192.168.1.100:22
     ```
 
 5.  `Tunnel` from `client-3` to `client-1` using `Relay` mode and tunnel `TCP` traffic
 
     ```sh
-    sudo xtunnel-os-arch --mode=client --token=token-c3 --broker=localhost:10000 --tunPeer=client-1 --tunPeerMode=relay --tunType=tcp --tunFrom=:8100 --tunTo=192.168.1.100:22
+    sudo xtunnel --mode=client --token=token-c3 --broker=localhost:10000 --tunPeer=client-1 --tunPeerMode=relay --tunType=tcp --tunFrom=:8100 --tunTo=192.168.1.100:22
     ```
 
 6.  `Reverse Tunnel` from `client-1` to `client-4` using `P2P` mode and tunnel `TCP` traffic
 
     ```sh
-    sudo xtunnel-os-arch --mode=client --token=token-c4 --broker=localhost:10000 --tunPeer=client-3 --tunPeerMode=p2p --tunType=tcp --tunRev=true --tunFrom=:9000 --tunTo=192.168.1.100:22
+    sudo xtunnel --mode=client --token=token-c4 --broker=localhost:10000 --tunPeer=client-3 --tunPeerMode=p2p --tunType=tcp --tunRev=true --tunFrom=:9000 --tunTo=192.168.1.100:22
     ```
 
 7.  `Multiple Tunnels` from `client-5`
 
     ```sh
-    sudo xtunnel-os-arch --mode=client --token=token-c5 --broker=localhost:10000 --config="./example/client-5.yaml"
+    sudo xtunnel --mode=client --token=token-c5 --broker=localhost:10000 --config="./example/client-5.yaml"
     ```
 
 ## Build

@@ -21,6 +21,7 @@
 
 # Bin
 /bin
+/dist
 
 ### Go Patch ###
 /vendor/
