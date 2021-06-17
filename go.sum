@@ -155,6 +155,12 @@ github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/supergiant-hq/xnet v0.1.4 h1:Y3pHw0Jutv3lRRAQblMHxYpv6vg4fMoRYjV6uJQWsoA=
 github.com/supergiant-hq/xnet v0.1.4/go.mod h1:UZfdPNJTK4VcdTjeq20X19J7COyo8HE5I/6DSOQ9yog=
+github.com/supergiant-hq/xnet v0.1.5-0.20210617140405-6eb0ececd21c h1:LK6xnTo8N8T6RUyuVauRZtZoaYOZxPmywMq3ssR2Pv0=
+github.com/supergiant-hq/xnet v0.1.5-0.20210617140405-6eb0ececd21c/go.mod h1:UZfdPNJTK4VcdTjeq20X19J7COyo8HE5I/6DSOQ9yog=
+github.com/supergiant-hq/xnet v0.1.5-0.20210617144740-4e21cc6df306 h1:XTxehM2q6UU6hv0JpgjBxibKGZbBNtw5krBXTQC9HDY=
+github.com/supergiant-hq/xnet v0.1.5-0.20210617144740-4e21cc6df306/go.mod h1:UZfdPNJTK4VcdTjeq20X19J7COyo8HE5I/6DSOQ9yog=
+github.com/supergiant-hq/xnet v0.1.5 h1:Imlt9JAfkbq1cKz4WIv+f5bpRoxa3DWO7ZTUitpbG8g=
+github.com/supergiant-hq/xnet v0.1.5/go.mod h1:UZfdPNJTK4VcdTjeq20X19J7COyo8HE5I/6DSOQ9yog=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
 github.com/viant/assertly v0.4.8/go.mod h1:aGifi++jvCrUaklKEKT0BU95igDNaqkvz+49uaYMPRU=
 github.com/viant/toolbox v0.24.0/go.mod h1:OxMCG57V0PXuIP2HNQrtJf2CjqdmbrOx5EkMILuUhzM=
