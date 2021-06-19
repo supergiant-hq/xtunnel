@@ -1,8 +1,9 @@
-# xTUNNEL
+# xTunnel
 
+[![ProjectStatus](https://img.shields.io/badge/status-experimental-orange)](README.md)
 [![Release](https://github.com/supergiant-hq/xtunnel/actions/workflows/goreleaser.yaml/badge.svg)](https://github.com/supergiant-hq/xtunnel/actions/workflows/goreleaser.yaml)
 
-xTUNNEL is a tool to tunnel TCP/UDP traffic between systems.
+xTunnel is a tool to tunnel TCP/UDP traffic between systems
 
 ## Features
 
@@ -79,7 +80,7 @@ Download the binary for your respective `OS` and `ARCH` from [Releases][releases
 
 ## Build
 
-This tool depends on [Make][toolmake] and [Protobuf][toolprotobuf] packages. Be sure to install them before building.
+This tool depends on [Make][toolmake] and [Protobuf][toolprotobuf] packages. Be sure to install them before building
 
 ```sh
 make all
@@ -87,7 +88,7 @@ make all
 
 ## Packages
 
-xTUNNEL depends on the following core packages
+This tool depends on the following core dependencies
 
 | Module             | Link            |
 | ------------------ | --------------- |
