@@ -3,11 +3,11 @@
 [![ProjectStatus](https://img.shields.io/badge/status-experimental-orange)](README.md)
 [![Release](https://github.com/supergiant-hq/xtunnel/actions/workflows/goreleaser.yaml/badge.svg)](https://github.com/supergiant-hq/xtunnel/actions/workflows/goreleaser.yaml)
 
-xTunnel is a tool to tunnel TCP/UDP traffic between systems
+xTunnel is a tool to tunnel TCP/UDP traffic between systems using QUIC protocol
 
 ## Features
 
-- Tunnel TCP/UDP traffic
+- Encrypted Tunnels for TCP/UDP traffic
 - Reverse tunnels
 - Tunnel between systems even if they're behind a NAT
 
